@@ -1,21 +1,68 @@
 {
-  "name": "my-addon",
+  "name": "ss-keel-oauth",
   "version": "0.1.0",
-  "description": "Description of my addon",
-  "register": true,
-  "repo": "github.com/your-user/your-repo",
+  "description": "OAuth2 authentication — Google, GitHub, GitLab",
+  "repo": "github.com/slice-soft/ss-keel-oauth",
   "steps": [
     {
-      "file": "cmd/main.go",
-      "action": "append",
-      "snippet": "// TODO: add addon initialization here",
-      "flags": []
+      "type": "go_get",
+      "package": "github.com/slice-soft/ss-keel-oauth"
     },
     {
-      "file": "config/config.go",
-      "action": "append",
-      "snippet": "// TODO: add addon configuration here",
-      "flags": []
+      "type": "env",
+      "key": "OAUTH_GOOGLE_CLIENT_ID",
+      "example": "",
+      "description": "Google OAuth2 client ID (console.cloud.google.com → Credentials)"
+    },
+    {
+      "type": "env",
+      "key": "OAUTH_GOOGLE_CLIENT_SECRET",
+      "example": "",
+      "description": "Google OAuth2 client secret"
+    },
+    {
+      "type": "env",
+      "key": "OAUTH_GITHUB_CLIENT_ID",
+      "example": "",
+      "description": "GitHub OAuth2 client ID (github.com/settings/developers)"
+    },
+    {
+      "type": "env",
+      "key": "OAUTH_GITHUB_CLIENT_SECRET",
+      "example": "",
+      "description": "GitHub OAuth2 client secret"
+    },
+    {
+      "type": "env",
+      "key": "OAUTH_GITLAB_CLIENT_ID",
+      "example": "",
+      "description": "GitLab OAuth2 application ID (gitlab.com/-/user_settings/applications)"
+    },
+    {
+      "type": "env",
+      "key": "OAUTH_GITLAB_CLIENT_SECRET",
+      "example": "",
+      "description": "GitLab OAuth2 client secret"
+    },
+    {
+      "type": "env",
+      "key": "OAUTH_REDIRECT_BASE_URL",
+      "example": "http://localhost:3000",
+      "description": "Base URL used to build provider callback URLs — e.g. https://myapp.com"
+    },
+    {
+      "type": "main_import",
+      "path": "github.com/slice-soft/ss-keel-oauth/oauth"
+    },
+    {
+      "type": "main_import",
+      "path": "github.com/slice-soft/ss-keel-core/config"
+    },
+    {
+      "type": "main_code",
+      "anchor": "before_listen",
+      "guard": "oauth.New(",
+      "code": "redirectBase := config.GetEnvOrDefault(\"OAUTH_REDIRECT_BASE_URL\", \"http://localhost:3000\")\n\noauthManager := oauth.New(oauth.Config{\n\tGoogle: &oauth.ProviderConfig{\n\t\tClientID:     config.GetEnvOrDefault(\"OAUTH_GOOGLE_CLIENT_ID\", \"\"),\n\t\tClientSecret: config.GetEnvOrDefault(\"OAUTH_GOOGLE_CLIENT_SECRET\", \"\"),\n\t\tRedirectURL:  redirectBase + \"/auth/google/callback\",\n\t},\n\tSigner: jwtSigner, // replace with your TokenSigner (e.g., from ss-keel-jwt)\n\tLogger: appLogger,\n})\napp.RegisterController(oauth.NewController(oauthManager))"
     }
   ]
 }

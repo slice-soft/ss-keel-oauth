@@ -1,8 +1,7 @@
 <img src="https://cdn.slicesoft.dev/boat.svg" width="400" />
 
-# Keel Addon Template
-Keel is a Go framework for building REST APIs with modular 
-architecture, automatic OpenAPI, and built-in validation.
+# ss-keel-oauth
+OAuth2 authentication addon for Keel — Google, GitHub, and GitLab providers.
 
 [![CI](https://github.com/slice-soft/ss-keel-core/actions/workflows/ci.yml/badge.svg)](https://github.com/slice-soft/ss-keel-core/actions)
 ![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)
