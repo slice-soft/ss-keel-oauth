@@ -1,11 +1,9 @@
 
-# Contributing to ss-keel-cli
+# Contributing to ss-keel-oauth
 
 The base contributing guide — workflow, commit conventions, PR guidelines, and community standards — lives in the [ss-community](https://github.com/slice-soft/ss-community/blob/main/CONTRIBUTING.md) repository. Read it first.
 
 This document covers only what is specific to this repository.
-
----
 
 ## Getting Started
 
@@ -14,11 +12,11 @@ This document covers only what is specific to this repository.
 >- Git
 
 
-1. **create a repository using this template**: [Use this template](https://github.com/slice-soft/ss-keel-addon-template/generate)
+1. **Fork the repository**
 2. **Clone your repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/REPO_NAME.git
-   cd REPO_NAME
+   git clone https://github.com/YOUR_USERNAME/ss-keel-oauth.git
+   cd ss-keel-oauth
    ```
 
 3. **Install dependencies**
