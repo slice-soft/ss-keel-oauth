@@ -11,15 +11,6 @@ const (
 	ProviderGitLab ProviderName = "gitlab"
 )
 
-// TokenSigner signs a JWT for the authenticated user.
-// ss-keel-jwt satisfies this interface; any custom implementation also works.
-//
-// The subject is formatted as "<provider>:<user-id>" (e.g. "google:1234567890").
-// Claims include email, name, avatar_url, and provider.
-type TokenSigner interface {
-	Sign(subject string, claims map[string]interface{}) (string, error)
-}
-
 // ProviderConfig holds the OAuth2 credentials for a single provider.
 type ProviderConfig struct {
 	// ClientID is the OAuth2 application client ID.
@@ -44,7 +35,7 @@ type Config struct {
 
 	// Signer signs the JWT returned to the client after a successful OAuth flow.
 	// Typically satisfied by ss-keel-jwt. Required — New panics if nil.
-	Signer TokenSigner
+	Signer contracts.TokenSigner
 
 	// Logger is optional. Warn-level output is suppressed when nil.
 	Logger contracts.Logger

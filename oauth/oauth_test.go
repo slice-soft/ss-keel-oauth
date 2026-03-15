@@ -12,7 +12,7 @@ import (
 // stubSigner is a test double that returns a fixed token or a configured error.
 type stubSigner struct{ err error }
 
-func (s *stubSigner) Sign(_ string, _ map[string]interface{}) (string, error) {
+func (s *stubSigner) Sign(_ string, _ map[string]any) (string, error) {
 	if s.err != nil {
 		return "", s.err
 	}
