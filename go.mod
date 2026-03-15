@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.0
-	github.com/slice-soft/ss-keel-core v0.3.1
+	github.com/slice-soft/ss-keel-core v0.4.0
 	golang.org/x/oauth2 v0.26.0
 )
 
@@ -30,5 +30,3 @@ require (
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
-
-replace github.com/slice-soft/ss-keel-core => ../ss-keel-core
