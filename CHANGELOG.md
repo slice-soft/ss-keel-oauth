@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.1.0...v1.2.0) (2026-03-15)
+
+
+### Features
+
+* Add support for addon dependency and update OAuth redirect URL ([#5](https://github.com/slice-soft/ss-keel-oauth/issues/5)) ([9287227](https://github.com/slice-soft/ss-keel-oauth/commit/92872279b94506fe496e0bd77668c7e9c8980b6c))
+
 ## [1.1.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.0.0...v1.1.0) (2026-03-15)
 
 
