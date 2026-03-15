@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.0.0...v1.1.0) (2026-03-15)
+
+
+### Features
+
+* Update TokenSigner interface and replace usage with contracts package ([#3](https://github.com/slice-soft/ss-keel-oauth/issues/3)) ([658ae71](https://github.com/slice-soft/ss-keel-oauth/commit/658ae719b0763d35c4ea3c971d2d4465553a07be))
+
 ## 1.0.0 (2026-03-14)
 
 
