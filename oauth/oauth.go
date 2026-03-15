@@ -110,7 +110,7 @@ func (o *OAuth) CallbackHandler(name ProviderName) func(*httpx.Ctx) error {
 		}
 
 		subject := fmt.Sprintf("%s:%s", name, userInfo.ID)
-		claims := map[string]interface{}{
+		claims := map[string]any{
 			"email":      userInfo.Email,
 			"name":       userInfo.Name,
 			"avatar_url": userInfo.AvatarURL,
