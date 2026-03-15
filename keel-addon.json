@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "OAuth2 authentication — Google, GitHub, GitLab",
   "repo": "github.com/slice-soft/ss-keel-oauth",
+  "depends_on": ["jwt"],
   "steps": [
     {
       "type": "go_get",
@@ -47,22 +48,20 @@
     {
       "type": "env",
       "key": "OAUTH_REDIRECT_BASE_URL",
-      "example": "http://localhost:3000",
-      "description": "Base URL used to build provider callback URLs — e.g. https://myapp.com"
+      "example": "http://localhost:7331",
+      "description": "Base URL used to build provider callback URLs. In production use your public domain (e.g. https://api.myapp.com)"
     },
     {
-      "type": "main_import",
-      "path": "github.com/slice-soft/ss-keel-oauth/oauth"
-    },
-    {
-      "type": "main_import",
-      "path": "github.com/slice-soft/ss-keel-core/config"
+      "type": "create_provider_file",
+      "filename": "cmd/setup_oauth.go",
+      "guard": "func setupOAuth(",
+      "content": "package main\n\nimport (\n\t\"github.com/slice-soft/ss-keel-core/config\"\n\t\"github.com/slice-soft/ss-keel-core/core\"\n\t\"github.com/slice-soft/ss-keel-core/logger\"\n\t\"github.com/slice-soft/ss-keel-jwt/jwt\"\n\t\"github.com/slice-soft/ss-keel-oauth/oauth\"\n)\n\n// setupOAuth registers the OAuth2 controller for the configured providers.\n// jwtProvider is used to sign the JWT returned after a successful OAuth flow.\nfunc setupOAuth(app *core.App, jwtProvider *jwt.JWT, log *logger.Logger) {\n\tredirectBase := config.GetEnvOrDefault(\"OAUTH_REDIRECT_BASE_URL\", \"http://localhost:7331\")\n\toauthManager := oauth.New(oauth.Config{\n\t\tGoogle: &oauth.ProviderConfig{\n\t\t\tClientID:     config.GetEnvOrDefault(\"OAUTH_GOOGLE_CLIENT_ID\", \"\"),\n\t\t\tClientSecret: config.GetEnvOrDefault(\"OAUTH_GOOGLE_CLIENT_SECRET\", \"\"),\n\t\t\tRedirectURL:  redirectBase + \"/auth/google/callback\",\n\t\t},\n\t\tSigner: jwtProvider,\n\t\tLogger: log,\n\t})\n\tapp.RegisterController(oauth.NewController(oauthManager))\n}\n"
     },
     {
       "type": "main_code",
       "anchor": "before_listen",
-      "guard": "oauth.New(",
-      "code": "redirectBase := config.GetEnvOrDefault(\"OAUTH_REDIRECT_BASE_URL\", \"http://localhost:3000\")\n\noauthManager := oauth.New(oauth.Config{\n\tGoogle: &oauth.ProviderConfig{\n\t\tClientID:     config.GetEnvOrDefault(\"OAUTH_GOOGLE_CLIENT_ID\", \"\"),\n\t\tClientSecret: config.GetEnvOrDefault(\"OAUTH_GOOGLE_CLIENT_SECRET\", \"\"),\n\t\tRedirectURL:  redirectBase + \"/auth/google/callback\",\n\t},\n\tSigner: jwtSigner, // replace with your TokenSigner (e.g., from ss-keel-jwt)\n\tLogger: appLogger,\n})\napp.RegisterController(oauth.NewController(oauthManager))"
+      "guard": "setupOAuth(",
+      "code": "setupOAuth(app, jwtProvider, appLogger)"
     }
   ]
 }
