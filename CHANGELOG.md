@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.2.0...v1.3.0) (2026-03-17)
+
+
+### Features
+
+* Enhance OAuth configuration with new environment variables and validation for provider completeness ([#9](https://github.com/slice-soft/ss-keel-oauth/issues/9)) ([b2c483c](https://github.com/slice-soft/ss-keel-oauth/commit/b2c483cde533aac9dbee2a18a2c6d67cf7607c93))
+
 ## [1.2.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.1.0...v1.2.0) (2026-03-15)
 
 
