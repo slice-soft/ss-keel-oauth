@@ -5,6 +5,7 @@ OAuth2 authentication addon for Keel — Google, GitHub, and GitLab providers wi
 
 [![CI](https://github.com/slice-soft/ss-keel-oauth/actions/workflows/ci.yml/badge.svg)](https://github.com/slice-soft/ss-keel-oauth/actions)
 ![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)
+[![Go Report Card](https://goreportcard.com/badge/github.com/slice-soft/ss-keel-oauth)](https://goreportcard.com/report/github.com/slice-soft/ss-keel-oauth)
 [![Go Reference](https://pkg.go.dev/badge/github.com/slice-soft/ss-keel-oauth.svg)](https://pkg.go.dev/github.com/slice-soft/ss-keel-oauth)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Made in Colombia](https://img.shields.io/badge/Made%20in-Colombia-FCD116?labelColor=003893)
