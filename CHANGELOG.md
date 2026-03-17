@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.3.0...v1.4.0) (2026-03-17)
+
+
+### Features
+
+* Add support for redirect mode and enhance environment variable configuration in OAuth setup ([#11](https://github.com/slice-soft/ss-keel-oauth/issues/11)) ([0ad2949](https://github.com/slice-soft/ss-keel-oauth/commit/0ad29499a7b539426c94ecde1d7e8e47406ecee6))
+
 ## [1.3.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.2.0...v1.3.0) (2026-03-17)
 
 
