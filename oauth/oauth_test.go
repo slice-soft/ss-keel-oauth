@@ -124,3 +124,21 @@ func TestNewController_CustomPrefix(t *testing.T) {
 		t.Errorf("expected /sign-in/github got %s", routes[0].Path())
 	}
 }
+
+func TestNewController_SkipsIncompleteProviderConfig(t *testing.T) {
+	o := oauth.New(oauth.Config{
+		Google: &oauth.ProviderConfig{
+			ClientID:     "id",
+			ClientSecret: "",
+			RedirectURL:  "http://localhost/auth/google/callback",
+		},
+		Signer: &stubSigner{},
+	})
+
+	ctrl := oauth.NewController(o)
+	routes := ctrl.Routes()
+
+	if len(routes) != 0 {
+		t.Errorf("expected no routes for incomplete provider config, got %d", len(routes))
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/slice-soft/ss-keel-core/core/httpx"
@@ -27,7 +28,7 @@ type OAuth struct {
 }
 
 // New creates an OAuth manager from the given Config.
-// Only providers with a non-nil ProviderConfig are activated.
+// Only providers with a complete ProviderConfig are activated.
 // Panics if Config.Signer is nil.
 func New(cfg Config) *OAuth {
 	if cfg.Signer == nil {
@@ -39,17 +40,32 @@ func New(cfg Config) *OAuth {
 		providers: make(map[ProviderName]provider),
 	}
 
-	if cfg.Google != nil {
+	if providerConfigReady(cfg.Google) {
 		o.providers[ProviderGoogle] = newGoogleProvider(cfg.Google)
+	} else if cfg.Google != nil && cfg.Logger != nil {
+		cfg.Logger.Warn("oauth[%s]: provider config incomplete; skipping route registration", ProviderGoogle)
 	}
-	if cfg.GitHub != nil {
+	if providerConfigReady(cfg.GitHub) {
 		o.providers[ProviderGitHub] = newGitHubProvider(cfg.GitHub)
+	} else if cfg.GitHub != nil && cfg.Logger != nil {
+		cfg.Logger.Warn("oauth[%s]: provider config incomplete; skipping route registration", ProviderGitHub)
 	}
-	if cfg.GitLab != nil {
+	if providerConfigReady(cfg.GitLab) {
 		o.providers[ProviderGitLab] = newGitLabProvider(cfg.GitLab)
+	} else if cfg.GitLab != nil && cfg.Logger != nil {
+		cfg.Logger.Warn("oauth[%s]: provider config incomplete; skipping route registration", ProviderGitLab)
 	}
 
 	return o
+}
+
+func providerConfigReady(pc *ProviderConfig) bool {
+	if pc == nil {
+		return false
+	}
+	return strings.TrimSpace(pc.ClientID) != "" &&
+		strings.TrimSpace(pc.ClientSecret) != "" &&
+		strings.TrimSpace(pc.RedirectURL) != ""
 }
 
 // LoginHandler returns a handler that redirects the browser to the
