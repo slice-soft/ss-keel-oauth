@@ -50,8 +50,10 @@ go get github.com/slice-soft/ss-keel-oauth
 | `OAUTH_GITLAB_CLIENT_ID` | GitLab OAuth2 application ID ([gitlab.com/-/user_settings/applications](https://gitlab.com/-/user_settings/applications)) |
 | `OAUTH_GITLAB_CLIENT_SECRET` | GitLab OAuth2 client secret |
 | `OAUTH_REDIRECT_BASE_URL` | Base URL for building callback URLs (e.g. `http://localhost:7331` in dev, `https://api.myapp.com` in prod) |
+| `OAUTH_ROUTE_PREFIX` | Route prefix used to expose OAuth login and callback routes (default: `/auth`) |
+| `OAUTH_ENABLED_PROVIDERS` | Optional comma-separated list of enabled providers (`google,github,gitlab`) |
 
-Configure only the providers you need — a provider is skipped when its config is absent.
+`keel add oauth` generates a `cmd/setup_oauth.go` that reads Google, GitHub, and GitLab credentials from `.env`. Providers are only activated when both client ID and client secret are present. Set `OAUTH_ENABLED_PROVIDERS=google,github` to restrict the exposed routes further.
 
 ---
 
@@ -86,8 +88,7 @@ func setupOAuth(app *core.App, jwtProvider *jwt.JWT, log *logger.Logger) {
 }
 ```
 
-This registers `GET /auth/google` and `GET /auth/google/callback` automatically.
-Add `GitHub` or `GitLab` provider configs to the same `oauth.Config` to enable those routes.
+The generated `cmd/setup_oauth.go` created by `keel add oauth` goes further than this minimal example: it normalizes `OAUTH_ROUTE_PREFIX`, auto-builds callback URLs from `OAUTH_REDIRECT_BASE_URL`, and only registers routes for providers with complete credentials.
 
 ---
 
@@ -109,7 +110,7 @@ The `data` map includes: `email`, `name`, `avatar_url`, `provider`.
 
 ## 🔗 Routes
 
-`NewController` registers the following routes for every configured provider:
+`NewController` registers the following routes for every enabled provider:
 
 | Route | Description |
 |---|---|

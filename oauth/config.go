@@ -28,7 +28,7 @@ type ProviderConfig struct {
 // Config is the top-level configuration for the OAuth addon.
 type Config struct {
 	// Google, GitHub, GitLab — configure only the providers you need.
-	// A provider is skipped when its config is nil.
+	// A provider is skipped when its config is nil or incomplete.
 	Google *ProviderConfig
 	GitHub *ProviderConfig
 	GitLab *ProviderConfig
