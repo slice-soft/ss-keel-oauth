@@ -1,162 +1,148 @@
 <img src="https://cdn.slicesoft.dev/boat.svg" width="400" />
 
 # ss-keel-oauth
-OAuth2 authentication addon for Keel — Google, GitHub, and GitLab providers.
+OAuth2 authentication addon for Keel — Google, GitHub, and GitLab providers with JWT issuance on callback.
 
-[![CI](https://github.com/slice-soft/ss-keel-core/actions/workflows/ci.yml/badge.svg)](https://github.com/slice-soft/ss-keel-core/actions)
+[![CI](https://github.com/slice-soft/ss-keel-oauth/actions/workflows/ci.yml/badge.svg)](https://github.com/slice-soft/ss-keel-oauth/actions)
 ![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)
-[![Go Report Card](https://goreportcard.com/badge/github.com/slice-soft/ss-keel-core)](https://goreportcard.com/report/github.com/slice-soft/ss-keel-core)
-[![Go Reference](https://pkg.go.dev/badge/github.com/slice-soft/ss-keel-core.svg)](https://pkg.go.dev/github.com/slice-soft/ss-keel-core)
+[![Go Reference](https://pkg.go.dev/badge/github.com/slice-soft/ss-keel-oauth.svg)](https://pkg.go.dev/github.com/slice-soft/ss-keel-oauth)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Made in Colombia](https://img.shields.io/badge/Made%20in-Colombia-FCD116?labelColor=003893)
 
 
-This repository is a **base template** for building **Keel Framework** addons.
-It helps developers and companies quickly create functional addons with CI/CD, testing, and automated releases.
-It also serves as a reference for the `keel-addon.json` contract used by the CLI to download and integrate addons into Keel projects.
+## OAuth2 authentication addon for Keel
+
+`ss-keel-oauth` adds OAuth2 authentication to any Keel application.
+After a successful provider flow the addon signs a JWT and returns it to the client — either as JSON or as a redirect with the token in the query string.
+
+**Supported providers:** Google · GitHub · GitLab
 
 ---
 
-## 🚀 Template structure
-
-```
-ss-keel-addon-template/
-├── .github/workflows/    # CI and release workflows (commented by default)
-│   ├── ci.yml
-│   └── release.yml
-├── .gitignore
-├── .release-please-manifest.json
-├── .release-please-config.json
-├── CONTRIBUTING.md       # Contribution guide
-├── keel-addon.json       # Addon contract for the CLI
-├── LICENSE
-├── README.md
-└── go.mod
-```
-
----
-
-## 🛠️ Create a new addon
-
-Recommended option (GitHub Template):
-
-1. Open this repository on GitHub.
-2. Click **Use this template**.
-3. Create your new repository from this template.
-4. Clone your new repository locally.
-
-Alternative option (manual clone):
+## 🚀 Installation
 
 ```bash
-# Clone the template into a new project
-git clone https://github.com/slice-soft/ss-keel-addon-template.git my-addon
-cd my-addon
-
-# Delete the existing git history
-rm -rf .git
-
-# Initialize a new git repository
-git init
-
-# Update the Go module path
-go mod edit -module github.com/my-company/my-addon
-go mod tidy
+keel add oauth
 ```
 
-> `my-addon` is now ready to be developed and registered in Keel.
+The Keel CLI will:
+1. Add `github.com/slice-soft/ss-keel-oauth` as a dependency.
+2. Create `cmd/setup_oauth.go` and inject initialization code into `cmd/main.go`.
+3. Add OAuth provider environment variable examples to your `.env`.
 
-Edit `keel-addon.json` with your addon's real values (`name`, `repo`, `version`, `steps`, etc.).
+Manual install:
+
+```bash
+go get github.com/slice-soft/ss-keel-oauth
+```
 
 ---
 
-## ⚡️ Keel integration
+## ⚙️ Environment variables
 
-* Place your addon logic in `internal/addon`.
-* Define metadata in `keel-addon.json`. This file is the contract the Keel CLI validates to install and integrate the addon.
+| Variable | Description |
+|---|---|
+| `OAUTH_GOOGLE_CLIENT_ID` | Google OAuth2 client ID ([console.cloud.google.com](https://console.cloud.google.com/apis/credentials)) |
+| `OAUTH_GOOGLE_CLIENT_SECRET` | Google OAuth2 client secret |
+| `OAUTH_GITHUB_CLIENT_ID` | GitHub OAuth2 client ID ([github.com/settings/developers](https://github.com/settings/developers)) |
+| `OAUTH_GITHUB_CLIENT_SECRET` | GitHub OAuth2 client secret |
+| `OAUTH_GITLAB_CLIENT_ID` | GitLab OAuth2 application ID ([gitlab.com/-/user_settings/applications](https://gitlab.com/-/user_settings/applications)) |
+| `OAUTH_GITLAB_CLIENT_SECRET` | GitLab OAuth2 client secret |
+| `OAUTH_REDIRECT_BASE_URL` | Base URL for building callback URLs (e.g. `http://localhost:7331` in dev, `https://api.myapp.com` in prod) |
 
-```json
-{
-  "name": "my-addon",
-  "version": "0.1.0",
-  "description": "Short addon description",
-  "register": true,
-  "repo": "github.com/your-user/your-repo",
-  "steps": [
-    {
-      "file": "cmd/main.go",
-      "action": "append",
-      "snippet": "// TODO: add addon initialization here",
-      "flags": []
-    }
-  ]
+Configure only the providers you need — a provider is skipped when its config is absent.
+
+---
+
+## ⚡️ Quick start
+
+```go
+// cmd/setup_oauth.go — created by keel add oauth
+package main
+
+import (
+    "github.com/slice-soft/ss-keel-core/config"
+    "github.com/slice-soft/ss-keel-core/core"
+    "github.com/slice-soft/ss-keel-core/logger"
+    "github.com/slice-soft/ss-keel-jwt/jwt"
+    "github.com/slice-soft/ss-keel-oauth/oauth"
+)
+
+// setupOAuth registers the OAuth2 controller for the configured providers.
+// jwtProvider is used to sign the JWT returned after a successful OAuth flow.
+func setupOAuth(app *core.App, jwtProvider *jwt.JWT, log *logger.Logger) {
+    redirectBase := config.GetEnvOrDefault("OAUTH_REDIRECT_BASE_URL", "http://localhost:7331")
+    oauthManager := oauth.New(oauth.Config{
+        Google: &oauth.ProviderConfig{
+            ClientID:     config.GetEnvOrDefault("OAUTH_GOOGLE_CLIENT_ID", ""),
+            ClientSecret: config.GetEnvOrDefault("OAUTH_GOOGLE_CLIENT_SECRET", ""),
+            RedirectURL:  redirectBase + "/auth/google/callback",
+        },
+        Signer: jwtProvider,
+        Logger: log,
+    })
+    app.RegisterController(oauth.NewController(oauthManager))
 }
 ```
 
-* The Keel CLI uses this file to:
-  * Resolve the module to download (`repo`).
-  * Validate that the addon matches the expected format.
-  * Execute `steps` to integrate changes automatically.
-  * Register the addon when applicable (`register`).
+This registers `GET /auth/google` and `GET /auth/google/callback` automatically.
+Add `GitHub` or `GitLab` provider configs to the same `oauth.Config` to enable those routes.
 
 ---
 
-## 🧭 `keel add` flow in the ecosystem
+## 🔌 TokenSigner interface
 
-The CLI supports two installation paths:
+`ss-keel-oauth` depends on `contracts.TokenSigner` from `ss-keel-core` — not on `ss-keel-jwt` directly.
+`ss-keel-jwt` satisfies this interface, but any custom implementation works:
 
-1. **Official or verified addons**
-
-```bash
-keel add gorm
+```go
+type TokenSigner interface {
+    Sign(subject string, data map[string]any) (string, error)
+}
 ```
 
-* `gorm` is interpreted as an alias.
-* The CLI checks the `ss-keel-addons` alias repository.
-* If the alias exists, it gets the addon URL, downloads it, and validates its `keel-addon.json`.
-* Then it executes the defined `steps` to integrate it automatically into the project.
-
-2. **Unofficial addons or addons not verified by SliceSoft/community**
-
-```bash
-keel add github.com/user/repo
-```
-
-* The CLI uses the provided repository directly.
-* It downloads the module and validates its `keel-addon.json`.
-* If validation passes, it applies the automatic integration steps the same way as official addons.
+The signed token's `subject` is `"<provider>:<user-id>"` (e.g. `"google:1234567890"`).
+The `data` map includes: `email`, `name`, `avatar_url`, `provider`.
 
 ---
 
-## 📚 Alias library: `ss-keel-addons`
+## 🔗 Routes
 
-`ss-keel-addons` works as an alias catalog/library for addons.
+`NewController` registers the following routes for every configured provider:
 
-* Stores the relationship `alias -> repository URL`.
-* Lets the CLI verify whether an alias exists before installing.
-* Centralizes official or community-verified addons.
-* Acts as the entry point for pre-validation before the automatic download and integration process.
+| Route | Description |
+|---|---|
+| `GET /auth/google` | Redirects to Google's authorization page |
+| `GET /auth/google/callback` | Exchanges code, signs JWT, returns token |
+| `GET /auth/github` | Redirects to GitHub's authorization page |
+| `GET /auth/github/callback` | Exchanges code, signs JWT, returns token |
+| `GET /auth/gitlab` | Redirects to GitLab's authorization page |
+| `GET /auth/gitlab/callback` | Exchanges code, signs JWT, returns token |
+
+---
+
+## ❤️ Callback response modes
+
+**Mode 1 — JSON** (default, recommended for APIs and mobile): the callback returns `{ "token": "<jwt>" }`.
+
+**Mode 2 — Redirect**: set `RedirectOnSuccess` to redirect the browser to your frontend with the token as a query parameter.
+
+```go
+oauth.New(oauth.Config{
+    Google:            &oauth.ProviderConfig{...},
+    Signer:            jwtProvider,
+    RedirectOnSuccess: "https://myapp.com/auth/done",
+})
+```
+
+> Tokens in query strings appear in access logs and browser history. After reading the token, remove it from the URL with `history.replaceState`.
 
 ---
 
 ## 🤚 CI/CD and releases
 
-This repository is a template, so workflows are intentionally shipped **commented out** to avoid accidental executions after cloning:
-
-* `.github/workflows/ci.yml`
-* `.github/workflows/release.yml`
-
-To enable CI/CD in your new addon repository:
-
-1. Uncomment both workflow files.
-2. Push to GitHub to validate that Actions run correctly.
-
----
-
-## 💡 Recommendations
-
-* Keep your addons independent and modular.
-* Use Keel events and guards to extend functionality without touching the core.
-* Document each addon in its own project README.
+- **CI** runs on every pull request targeting `main` via `.github/workflows/ci.yml`.
+- **Releases** are created automatically on merge to `main` via `.github/workflows/release.yml` using Release Please.
 
 ---
 
@@ -183,7 +169,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Links
 
 - Website: [keel-go.dev](https://keel-go.dev)
-- GitHub: [github.com/slice-soft/ss-keel-cli](https://github.com/slice-soft/ss-keel-cli)
+- GitHub: [github.com/slice-soft/ss-keel-oauth](https://github.com/slice-soft/ss-keel-oauth)
 - Documentation: [docs.keel-go.dev](https://docs.keel-go.dev)
 
 ---
