@@ -92,6 +92,7 @@
       "type": "main_code",
       "anchor": "before_modules",
       "guard": "setupOAuth(",
+      "replace": "_ = jwtProvider",
       "code": "setupOAuth(app, jwtProvider, appLogger)"
     },
     {
