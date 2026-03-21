@@ -4,6 +4,7 @@
 OAuth2 authentication addon for Keel — Google, GitHub, and GitLab providers with JWT issuance on callback.
 
 [![CI](https://github.com/slice-soft/ss-keel-oauth/actions/workflows/ci.yml/badge.svg)](https://github.com/slice-soft/ss-keel-oauth/actions)
+[![Release](https://img.shields.io/github/v/release/slice-soft/ss-keel-oauth)](https://github.com/slice-soft/ss-keel-oauth/releases)
 ![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?logo=go&logoColor=white)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slice-soft/ss-keel-oauth)](https://goreportcard.com/report/github.com/slice-soft/ss-keel-oauth)
 [![Go Reference](https://pkg.go.dev/badge/github.com/slice-soft/ss-keel-oauth.svg)](https://pkg.go.dev/github.com/slice-soft/ss-keel-oauth)
