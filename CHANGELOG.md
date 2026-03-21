@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.5.0...v1.6.0) (2026-03-21)
+
+
+### Features
+
+* Add release badge to README for better visibility of versioning ([#15](https://github.com/slice-soft/ss-keel-oauth/issues/15)) ([f2001ee](https://github.com/slice-soft/ss-keel-oauth/commit/f2001ee9134d5d90587c3efaa92f5e6b00e54338))
+
 ## [1.5.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.4.0...v1.5.0) (2026-03-21)
 
 
