@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.4.0...v1.5.0) (2026-03-21)
+
+
+### Features
+
+* Update OAuth setup to replace jwtProvider in setupOAuth function ([#13](https://github.com/slice-soft/ss-keel-oauth/issues/13)) ([cb12ba8](https://github.com/slice-soft/ss-keel-oauth/commit/cb12ba8f4f4b31ef92faa033a4351126d19ef8f0))
+
 ## [1.4.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.3.0...v1.4.0) (2026-03-17)
 
 
