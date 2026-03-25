@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.7.1...v1.8.0) (2026-03-25)
+
+
+### Features
+
+* Update OAuth configuration with new properties and defaults ([#21](https://github.com/slice-soft/ss-keel-oauth/issues/21)) ([067d21b](https://github.com/slice-soft/ss-keel-oauth/commit/067d21bdcdc047169876c0ff8b4d4ef73d661482))
+
 ## [1.7.1](https://github.com/slice-soft/ss-keel-oauth/compare/v1.7.0...v1.7.1) (2026-03-25)
 
 
