@@ -6,8 +6,10 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/slice-soft/ss-keel-core/contracts"
 	"github.com/slice-soft/ss-keel-core/core/httpx"
 	"golang.org/x/oauth2"
 )
@@ -25,6 +27,7 @@ import (
 type OAuth struct {
 	cfg       Config
 	providers map[ProviderName]provider
+	events    chan contracts.PanelEvent
 }
 
 // New creates an OAuth manager from the given Config.
@@ -38,6 +41,7 @@ func New(cfg Config) *OAuth {
 	o := &OAuth{
 		cfg:       cfg,
 		providers: make(map[ProviderName]provider),
+		events:    make(chan contracts.PanelEvent, 256),
 	}
 
 	if providerConfigReady(cfg.Google) {
@@ -86,6 +90,16 @@ func (o *OAuth) LoginHandler(name ProviderName) func(*httpx.Ctx) error {
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to generate oauth state")
 		}
+		o.tryEmit(contracts.PanelEvent{
+			Timestamp: time.Now(),
+			AddonID:   "oauth",
+			Label:     "login",
+			Level:     "info",
+			Detail: map[string]any{
+				"provider": string(name),
+				"result":   "flow_started",
+			},
+		})
 		url := p.config().AuthCodeURL(state, oauth2.AccessTypeOnline)
 		return c.Redirect(url)
 	}
@@ -110,18 +124,51 @@ func (o *OAuth) CallbackHandler(name ProviderName) func(*httpx.Ctx) error {
 	return func(c *httpx.Ctx) error {
 		code := c.Query("code")
 		if code == "" {
+			o.tryEmit(contracts.PanelEvent{
+				Timestamp: time.Now(),
+				AddonID:   "oauth",
+				Label:     "callback",
+				Level:     "error",
+				Detail: map[string]any{
+					"provider": string(name),
+					"result":   "error",
+					"error":    "missing oauth code",
+				},
+			})
 			return fiber.NewError(fiber.StatusBadRequest, "missing oauth code")
 		}
 
 		token, err := p.config().Exchange(context.Background(), code)
 		if err != nil {
 			o.logWarn("CallbackHandler[%s]: exchange failed: %v", name, err)
+			o.tryEmit(contracts.PanelEvent{
+				Timestamp: time.Now(),
+				AddonID:   "oauth",
+				Label:     "callback",
+				Level:     "error",
+				Detail: map[string]any{
+					"provider": string(name),
+					"result":   "error",
+					"error":    "exchange failed",
+				},
+			})
 			return fiber.NewError(fiber.StatusUnauthorized, "oauth exchange failed")
 		}
 
 		userInfo, err := p.userInfo(context.Background(), token)
 		if err != nil {
 			o.logWarn("CallbackHandler[%s]: user info failed: %v", name, err)
+			o.tryEmit(contracts.PanelEvent{
+				Timestamp: time.Now(),
+				AddonID:   "oauth",
+				Label:     "callback",
+				Level:     "error",
+				Detail: map[string]any{
+					"provider": string(name),
+					"result":   "error",
+					"error":    "failed to fetch user info",
+				},
+			})
 			return fiber.NewError(fiber.StatusInternalServerError, "failed to fetch user info")
 		}
 
@@ -136,8 +183,31 @@ func (o *OAuth) CallbackHandler(name ProviderName) func(*httpx.Ctx) error {
 		jwt, err := o.cfg.Signer.Sign(subject, claims)
 		if err != nil {
 			o.logWarn("CallbackHandler[%s]: sign failed: %v", name, err)
+			o.tryEmit(contracts.PanelEvent{
+				Timestamp: time.Now(),
+				AddonID:   "oauth",
+				Label:     "callback",
+				Level:     "error",
+				Detail: map[string]any{
+					"provider": string(name),
+					"result":   "error",
+					"error":    "token signing failed",
+				},
+			})
 			return fiber.NewError(fiber.StatusInternalServerError, "token signing failed")
 		}
+
+		o.tryEmit(contracts.PanelEvent{
+			Timestamp: time.Now(),
+			AddonID:   "oauth",
+			Label:     "callback",
+			Level:     "info",
+			Detail: map[string]any{
+				"provider": string(name),
+				"user_id":  userInfo.ID,
+				"result":   "ok",
+			},
+		})
 
 		if o.cfg.RedirectOnSuccess != "" {
 			param := o.cfg.RedirectTokenParam
@@ -153,6 +223,15 @@ func (o *OAuth) CallbackHandler(name ProviderName) func(*httpx.Ctx) error {
 func (o *OAuth) logWarn(format string, args ...interface{}) {
 	if o.cfg.Logger != nil {
 		o.cfg.Logger.Warn(format, args...)
+	}
+}
+
+// tryEmit sends a PanelEvent to the events channel without blocking.
+// Events are silently dropped when the channel buffer is full.
+func (o *OAuth) tryEmit(e contracts.PanelEvent) {
+	select {
+	case o.events <- e:
+	default:
 	}
 }
 
