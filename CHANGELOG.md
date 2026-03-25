@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.6.0...v1.7.0) (2026-03-25)
+
+
+### Features
+
+* Implement OAuth addon with event handling and manifest support ([#17](https://github.com/slice-soft/ss-keel-oauth/issues/17)) ([09e5002](https://github.com/slice-soft/ss-keel-oauth/commit/09e5002ea43f60310190a87af5c7e9506b45c226))
+
 ## [1.6.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.5.0...v1.6.0) (2026-03-21)
 
 
