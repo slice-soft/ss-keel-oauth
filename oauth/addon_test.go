@@ -84,7 +84,10 @@ func TestAddon_Manifest_EnvVars_ExpectedKeys(t *testing.T) {
 		"OAUTH_GITLAB_CLIENT_ID",
 		"OAUTH_GITLAB_CLIENT_SECRET",
 		"OAUTH_REDIRECT_BASE_URL",
+		"OAUTH_ROUTE_PREFIX",
+		"OAUTH_ENABLED_PROVIDERS",
 		"OAUTH_REDIRECT_ON_SUCCESS",
+		"OAUTH_REDIRECT_TOKEN_PARAM",
 	}
 
 	keySet := make(map[string]contracts.EnvVar, len(m.EnvVars))
@@ -121,19 +124,47 @@ func TestAddon_Manifest_EnvVars_Secrets(t *testing.T) {
 	}
 }
 
-func TestAddon_Manifest_RedirectBaseURL_Required(t *testing.T) {
+func TestAddon_Manifest_ConfigKeysAndDefaults(t *testing.T) {
 	o := newTestOAuth()
 	m := o.Manifest()
 
+	wantConfigKeys := map[string]string{
+		"OAUTH_GOOGLE_CLIENT_ID":     "oauth.google.client-id",
+		"OAUTH_GOOGLE_CLIENT_SECRET": "oauth.google.client-secret",
+		"OAUTH_GITHUB_CLIENT_ID":     "oauth.github.client-id",
+		"OAUTH_GITHUB_CLIENT_SECRET": "oauth.github.client-secret",
+		"OAUTH_GITLAB_CLIENT_ID":     "oauth.gitlab.client-id",
+		"OAUTH_GITLAB_CLIENT_SECRET": "oauth.gitlab.client-secret",
+		"OAUTH_REDIRECT_BASE_URL":    "oauth.redirect-base-url",
+		"OAUTH_ROUTE_PREFIX":         "oauth.route-prefix",
+		"OAUTH_ENABLED_PROVIDERS":    "oauth.enabled-providers",
+		"OAUTH_REDIRECT_ON_SUCCESS":  "oauth.redirect-on-success",
+		"OAUTH_REDIRECT_TOKEN_PARAM": "oauth.redirect-token-param",
+	}
+
 	for _, ev := range m.EnvVars {
-		if ev.Key == "OAUTH_REDIRECT_BASE_URL" {
-			if !ev.Required {
-				t.Error("OAUTH_REDIRECT_BASE_URL should be Required=true")
-			}
-			return
+		if ev.ConfigKey != wantConfigKeys[ev.Key] {
+			t.Errorf("%s ConfigKey = %q; want %q", ev.Key, ev.ConfigKey, wantConfigKeys[ev.Key])
 		}
 	}
-	t.Error("OAUTH_REDIRECT_BASE_URL not found in EnvVars")
+
+	keySet := make(map[string]contracts.EnvVar, len(m.EnvVars))
+	for _, ev := range m.EnvVars {
+		keySet[ev.Key] = ev
+	}
+
+	if keySet["OAUTH_REDIRECT_BASE_URL"].Required {
+		t.Error("OAUTH_REDIRECT_BASE_URL should not be required")
+	}
+	if keySet["OAUTH_REDIRECT_BASE_URL"].Default != "http://127.0.0.1:7331" {
+		t.Errorf("OAUTH_REDIRECT_BASE_URL default = %q; want %q", keySet["OAUTH_REDIRECT_BASE_URL"].Default, "http://127.0.0.1:7331")
+	}
+	if keySet["OAUTH_ROUTE_PREFIX"].Default != "/auth" {
+		t.Errorf("OAUTH_ROUTE_PREFIX default = %q; want %q", keySet["OAUTH_ROUTE_PREFIX"].Default, "/auth")
+	}
+	if keySet["OAUTH_REDIRECT_TOKEN_PARAM"].Default != "token" {
+		t.Errorf("OAUTH_REDIRECT_TOKEN_PARAM default = %q; want %q", keySet["OAUTH_REDIRECT_TOKEN_PARAM"].Default, "token")
+	}
 }
 
 func TestAddon_TryEmit_EventReadableFromChannel(t *testing.T) {
