@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/slice-soft/ss-keel-oauth/compare/v1.7.0...v1.7.1) (2026-03-25)
+
+
+### Bug Fixes
+
+* Update ss-keel-core dependency to v0.10.0 in go.mod and go.sum ([#19](https://github.com/slice-soft/ss-keel-oauth/issues/19)) ([84294d5](https://github.com/slice-soft/ss-keel-oauth/commit/84294d5823d7d01ca521ce5057d905600f27af5a))
+
 ## [1.7.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.6.0...v1.7.0) (2026-03-25)
 
 
