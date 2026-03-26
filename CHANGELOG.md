@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/slice-soft/ss-keel-oauth/compare/v1.9.0...v1.9.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* Update OAUTH_REDIRECT_BASE_URL example to use 127.0.0.1 ([#24](https://github.com/slice-soft/ss-keel-oauth/issues/24)) ([1f8a12a](https://github.com/slice-soft/ss-keel-oauth/commit/1f8a12a0cabc8f04f82c00a3c8a2ffaf4980c5f0))
+
 ## [1.9.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.8.0...v1.9.0) (2026-03-25)
 
 
