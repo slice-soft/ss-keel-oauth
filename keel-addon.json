@@ -114,7 +114,7 @@
     {
       "type": "env",
       "key": "OAUTH_REDIRECT_BASE_URL",
-      "example": "http://localhost:7331",
+      "example": "http://127.0.0.1:7331",
       "description": "Base URL used to build provider callback URLs. In production use your public domain (e.g. https://api.myapp.com)"
     },
     {

@@ -50,13 +50,13 @@ go get github.com/slice-soft/ss-keel-oauth
 | `OAUTH_GITHUB_CLIENT_SECRET` | GitHub OAuth2 client secret |
 | `OAUTH_GITLAB_CLIENT_ID` | GitLab OAuth2 application ID ([gitlab.com/-/user_settings/applications](https://gitlab.com/-/user_settings/applications)) |
 | `OAUTH_GITLAB_CLIENT_SECRET` | GitLab OAuth2 client secret |
-| `OAUTH_REDIRECT_BASE_URL` | Base URL for building callback URLs (e.g. `http://localhost:7331` in dev, `https://api.myapp.com` in prod) |
+| `OAUTH_REDIRECT_BASE_URL` | Base URL for building callback URLs (e.g. `http://127.0.0.1:7331` in dev, `https://api.myapp.com` in prod) |
 | `OAUTH_ROUTE_PREFIX` | Route prefix used to expose OAuth login and callback routes (default: `/auth`) |
 | `OAUTH_ENABLED_PROVIDERS` | Optional comma-separated list of enabled providers (`google,github,gitlab`) |
 | `OAUTH_REDIRECT_ON_SUCCESS` | Optional frontend URL used for browser redirect mode after the JWT is signed |
 | `OAUTH_REDIRECT_TOKEN_PARAM` | Query parameter name used in redirect mode (default: `token`) |
 
-`keel add oauth` generates a `cmd/setup_oauth.go` that reads Google, GitHub, and GitLab credentials from `.env`, supports JSON and redirect callback modes through environment variables, and only activates providers when both client ID and client secret are present. Set `OAUTH_ENABLED_PROVIDERS=google,github` to restrict the exposed routes further.
+`keel add oauth` generates a `cmd/setup_oauth.go` that reads Google, GitHub, and GitLab credentials from `.env`, supports JSON and redirect callback modes through environment variables, and only activates providers when both client ID and client secret are present. If `jwt` is missing, the CLI prompts to install it first and defaults to yes when you press Enter. Set `OAUTH_ENABLED_PROVIDERS=google,github` to restrict the exposed routes further.
 
 ---
 
@@ -67,6 +67,8 @@ go get github.com/slice-soft/ss-keel-oauth
 package main
 
 import (
+    "strings"
+
     "github.com/slice-soft/ss-keel-core/config"
     "github.com/slice-soft/ss-keel-core/core"
     "github.com/slice-soft/ss-keel-core/logger"
@@ -74,27 +76,42 @@ import (
     "github.com/slice-soft/ss-keel-oauth/oauth"
 )
 
+type oauthSetupConfig struct {
+    GoogleClientID     string `keel:"oauth.google.client-id"`
+    GoogleClientSecret string `keel:"oauth.google.client-secret"`
+    GitHubClientID     string `keel:"oauth.github.client-id"`
+    GitHubClientSecret string `keel:"oauth.github.client-secret"`
+    GitLabClientID     string `keel:"oauth.gitlab.client-id"`
+    GitLabClientSecret string `keel:"oauth.gitlab.client-secret"`
+    RedirectBaseURL    string `keel:"oauth.redirect-base-url,required"`
+    RoutePrefix        string `keel:"oauth.route-prefix,required"`
+    EnabledProviders   string `keel:"oauth.enabled-providers"`
+    RedirectOnSuccess  string `keel:"oauth.redirect-on-success"`
+    RedirectTokenParam string `keel:"oauth.redirect-token-param,required"`
+}
+
 // setupOAuth registers the OAuth2 controller for the configured providers.
 // jwtProvider is used to sign the JWT returned after a successful OAuth flow.
 func setupOAuth(app *core.App, jwtProvider *jwt.JWT, log *logger.Logger) {
-    redirectBase := config.GetEnvOrDefault("OAUTH_REDIRECT_BASE_URL", "http://localhost:7331")
-    routePrefix := config.GetEnvOrDefault("OAUTH_ROUTE_PREFIX", "/auth")
+    oauthConfig := config.MustLoadConfig[oauthSetupConfig]()
+    routePrefix := normalizeOAuthRoutePrefix(oauthConfig.RoutePrefix)
+    redirectBase := normalizeOAuthRedirectBase(oauthConfig.RedirectBaseURL)
+    redirectOnSuccess := normalizeOAuthSuccessRedirect(oauthConfig.RedirectOnSuccess)
+    redirectTokenParam := normalizeOAuthRedirectTokenParam(oauthConfig.RedirectTokenParam)
+    enabledProviders := parseOAuthEnabledProviders(oauthConfig.EnabledProviders)
+
     oauthManager := oauth.New(oauth.Config{
-        Google: &oauth.ProviderConfig{
-            ClientID:     config.GetEnvOrDefault("OAUTH_GOOGLE_CLIENT_ID", ""),
-            ClientSecret: config.GetEnvOrDefault("OAUTH_GOOGLE_CLIENT_SECRET", ""),
-            RedirectURL:  redirectBase + routePrefix + "/google/callback",
-        },
+        Google: oauthProviderConfig(redirectBase, routePrefix, enabledProviders, oauth.ProviderGoogle, oauthConfig.GoogleClientID, oauthConfig.GoogleClientSecret),
         Signer:             jwtProvider,
         Logger:             log,
-        RedirectOnSuccess:  config.GetEnvOrDefault("OAUTH_REDIRECT_ON_SUCCESS", ""),
-        RedirectTokenParam: config.GetEnvOrDefault("OAUTH_REDIRECT_TOKEN_PARAM", "token"),
+        RedirectOnSuccess:  redirectOnSuccess,
+        RedirectTokenParam: redirectTokenParam,
     })
     app.RegisterController(oauth.NewController(oauthManager, routePrefix))
 }
 ```
 
-The generated `cmd/setup_oauth.go` created by `keel add oauth` goes further than this minimal example: it normalizes `OAUTH_ROUTE_PREFIX`, auto-builds callback URLs from `OAUTH_REDIRECT_BASE_URL`, supports `OAUTH_REDIRECT_ON_SUCCESS` redirect mode, filters with `OAUTH_ENABLED_PROVIDERS`, and prints a protected `/api/me` follow-up snippet after install.
+The generated `cmd/setup_oauth.go` also includes helper functions for provider filtering and redirect normalization. `OAUTH_REDIRECT_BASE_URL` falls back to `http://127.0.0.1:7331`, and the CLI rewires `cmd/main.go` from the standalone JWT placeholder to `setupOAuth(app, jwtProvider, appLogger)` after installation.
 
 ---
 
