@@ -19,6 +19,9 @@ After a successful provider flow the addon signs a JWT and returns it to the cli
 
 **Supported providers:** Google · GitHub · GitLab
 
+Current stable release: `v1.10.0` (2026-04-22)  
+Full documentation: [docs.keel-go.dev/en/addons/ss-keel-oauth](https://docs.keel-go.dev/en/addons/ss-keel-oauth/)
+
 ---
 
 ## 🚀 Installation
@@ -197,7 +200,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - Website: [keel-go.dev](https://keel-go.dev)
 - GitHub: [github.com/slice-soft/ss-keel-oauth](https://github.com/slice-soft/ss-keel-oauth)
-- Documentation: [docs.keel-go.dev](https://docs.keel-go.dev)
+- Documentation: [docs.keel-go.dev/en/addons/ss-keel-oauth](https://docs.keel-go.dev/en/addons/ss-keel-oauth/)
 
 ---
 
