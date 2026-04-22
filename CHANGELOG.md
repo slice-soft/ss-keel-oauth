@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.9.1...v1.10.0) (2026-04-22)
+
+
+### Features
+
+* Enhance OAuth configuration with structured properties and examples ([#26](https://github.com/slice-soft/ss-keel-oauth/issues/26)) ([26f48da](https://github.com/slice-soft/ss-keel-oauth/commit/26f48da1c0b8101403d5f9150664a2d508a1141f))
+
 ## [1.9.1](https://github.com/slice-soft/ss-keel-oauth/compare/v1.9.0...v1.9.1) (2026-03-26)
 
 
