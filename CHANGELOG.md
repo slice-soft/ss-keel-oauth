@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.10.0...v1.11.0) (2026-05-08)
+
+
+### Features
+
+* update OAuth2 configuration to prioritize GitHub and remove Google/GitLab support ([#31](https://github.com/slice-soft/ss-keel-oauth/issues/31)) ([43a4df7](https://github.com/slice-soft/ss-keel-oauth/commit/43a4df7dff2399483cde27353a0bed9ebfc90b3f))
+
 ## [1.10.0](https://github.com/slice-soft/ss-keel-oauth/compare/v1.9.1...v1.10.0) (2026-04-22)
 
 
